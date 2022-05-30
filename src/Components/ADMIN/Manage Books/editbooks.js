@@ -1,12 +1,12 @@
 import React,{ useState, useEffect } from 'react'
 
-import './css/delete.css'
+import '../../css/delete.css'
 
 function Editbooks() {
-  const [count, setCount] = useState(10);
+  const [count, setCount] = useState(50);
   const [initial, setInitial] = useState(0);
-  const [nextvisibe, setNextvisible] = useState('block');
-  const [prevvisible, setPrevvisible] = useState('none');
+  const [nextvisibe, setNextvisible] = useState('visible');
+  const [prevvisible, setPrevvisible] = useState('hidden');
   const [editingRow, setEditingRow] = useState(null);
   const [savebtn, setSavebtn] = useState('none');
   const [searchedbooks, setSearchedBooks] = useState([]);
@@ -14,11 +14,14 @@ function Editbooks() {
   let [prevbook, setPrevbook] = useState([]);
   let confirm = 0;
   const [id, setId] = useState('');
+
+
+
   const handleSearch = (event) =>{
-    setInitial(0);
-    setCount(10);
-    setNextvisible('block');
-    setPrevvisible('none');
+    // setInitial(0);
+    // setCount(10);
+    // setNextvisible('block');
+    // setPrevvisible('none');
     let value = event.target.value.toLowerCase();
     let results = [];
     results = books.filter(book => book.Title.toLowerCase().includes(value) || book.Author.toLowerCase().includes(value) || book.Subject.toLowerCase().includes(value) || book.Pdate.toLowerCase().includes(value));
@@ -26,11 +29,14 @@ function Editbooks() {
 }
 
 
-    async function getbooks(){
-        const response = await fetch("http://localhost:8080/library_management/getbooks");
-         const data = await response.json();
-         return data;
+
+      async function getbooks(){
+        const response = await fetch("http://localhost:8080/library_management/getbooks?page="+initial);
+        const data = await response.json();
+        // console.log(data);
+        return data;
       }
+
       const [books, setBooks] = useState([]);
         useEffect(() => {
           getbooks().then(data => {
@@ -38,10 +44,35 @@ function Editbooks() {
             setSearchedBooks(data);
           }
           );
-        }, []);  
+        }, [initial, count]); 
+
+        const handleNext = () =>{
+          setInitial(initial+50);
+          setCount(count+50);
+          if(books.length < 50){
+            setNextvisible('hidden');
+          }
+          else{
+            setNextvisible('visible');
+          }
+          setPrevvisible('visible');
+        }
+
+        const handlePrev = () =>{
+          
+          setInitial(initial-50);
+          setCount(count-50);
+          if(initial === 50){
+            setPrevvisible('hidden');
+          }
+          
+          setNextvisible('visible');
+        }
         
         async function editRow(book,prevbook){
-          if(book[1] === prevbook.Title && book[2] === prevbook.Author && book[3] === prevbook.Subject && book[4] === prevbook.Pdate){
+          console.log(book);
+          console.log(prevbook);
+          if(book[1] === prevbook.Title && book[2] === prevbook.Author && book[3] === prevbook.Subject && book[4] === prevbook.Pdate && book[5] === prevbook.quantity){
             confirm = 0;
           }
           else{
@@ -50,7 +81,8 @@ function Editbooks() {
           const author = book[2];
           const subject = book[3];
           const pdate = book[4];
-          const response = await fetch("http://localhost:8080/library_management/editbooks?id="+id+"&title="+title+"&author="+author+"&subject="+subject+"&pdate="+pdate);
+          const quantity = book[5];
+          const response = await fetch("http://localhost:8080/library_management/editbooks?id="+id+"&title="+title+"&author="+author+"&subject="+subject+"&pdate="+pdate+"&quantity="+quantity);
           const data = await response.json();
           if(data.Status === 'Success'){
             confirm = 1;
@@ -73,7 +105,7 @@ function Editbooks() {
           }     
         }
 
-
+if(sessionStorage.getItem("loggedin") === "true"){
   return (
     
     
@@ -85,7 +117,6 @@ function Editbooks() {
       </form>
       </div>
     <div className='container_Delete'>
-
         <table className="styled-table">
             <thead className='thead'>
               <tr>
@@ -94,11 +125,12 @@ function Editbooks() {
                 <th>Author</th>
                 <th>Subject</th>
                 <th>Publication Date</th>
+                <th>Quantity</th>
                 <th>Edit</th>
               </tr>
             </thead>
             <tbody>
-              {searchedbooks.slice(initial,count).map(book => (
+              {searchedbooks.map(book => (
                 <tr key={book.Id}>
                   <td>  
                         <span>{book.Id}</span>
@@ -132,6 +164,13 @@ function Editbooks() {
                     )}
                   </td>
                   <td>
+                    {editingRow === book.Id ? (
+                        <input type="number" defaultValue={book.quantity} id='quantity' />
+                    ) : (
+                        <span>{book.quantity}</span>
+                    )}
+                   </td>
+                  <td>
                       {editingRow === book.Id ? (
                           <>
                           
@@ -144,7 +183,7 @@ function Editbooks() {
                             >Cancel</button>
                             <button className='delete_button'
                             onClick={() => {editRow(
-                              edibook = [id,document.getElementById('title').value,document.getElementById('author').value,document.getElementById('subject').value,document.getElementById('pdate').value],
+                              edibook = [id,document.getElementById('title').value,document.getElementById('author').value,document.getElementById('subject').value,document.getElementById('pdate').value,document.getElementById('quantity').value],
                               prevbook = book                              
                               ); setEditingRow(null);}}
 
@@ -167,35 +206,39 @@ function Editbooks() {
           </table>
     </div>
     <div className="container_Pagination">
-    <div className='inner'><button style={{"display": prevvisible} } className="button_Pagination" id='Previous' onClick={
-        () => {
-        setInitial(initial-10);
-        setCount(count-10);
-        //console.log(initial);
-        if(initial-10===0){
-            setPrevvisible('none');
-        }
-        setNextvisible('block');
-        }
-    }>Previous</button></div>
-   <div className='inner'> <button style={{"display": nextvisibe} } className="button_Pagination" id='Next' onClick={() =>{
-        //console.log(count);
-        if(count > searchedbooks.length-10){
-            setNextvisible('none');
-        }
-        setPrevvisible('block');
-
-         setInitial(initial+10);
-         setCount(count+10);
-         //console.log(count);
-
-        }
-    }>Next</button></div>
+    <div className="pagination">
+    <button className='prev_button' onClick={handlePrev} style={{visibility:prevvisible}}>Previous</button>
+    <button className='next_button' onClick={handleNext} style={{visibility:nextvisibe}}>Next</button>
+    </div>  
     </div>
     <br></br>
-    <a href='#/home' className='abtn'> HOME </a>
+    <div className="container_Home">
+                    <div className="tabs_Home">
+                        <button className="tablinks_Home abtn" onClick={() => {
+                            sessionStorage.removeItem("uid");
+                                   sessionStorage.removeItem("uname");
+                                   sessionStorage.removeItem("email");
+                                   window.location.href = "#/login";
+                        }
+                        }>LOGOUT</button>
+                        <button className="tablinks_Home abtn" onClick={() => {
+                            window.location.href = "#/home";
+                        }
+                        }>Home</button>
+                    </div>
+                </div>
     </>
   )
 }
-
+else{
+  return (
+    <div>
+        <h1>Please Login To Edit Books</h1>
+        <button className='tablinks_Home' onClick={() => {
+            window.location.href = "#/login";
+        }}>Login</button>
+    </div>
+)
+}
+}
 export default Editbooks

@@ -1,5 +1,5 @@
 import React from 'react';
-import './css/Login.css';
+import '../css/Login.css';
 function Login() {
 
     function handleSubmit(event) {
@@ -9,8 +9,9 @@ function Login() {
        .then((response) => response.json())
          .then((data1) => {
               if(data1.Status === "SUCCESS"){
-                 localStorage.setItem("loggedin", true);
-                 localStorage.setItem("uname", data1.uname);
+                 sessionStorage.setItem("loggedin", true);
+                 sessionStorage.setItem("luname", data1.luname);
+                 sessionStorage.setItem("luid", data1.id);
                  window.location.href = "#/home";
               }
               else{
@@ -28,7 +29,7 @@ function Login() {
 		</div>
 		<div className="login-content">
 			<form onSubmit={handleSubmit}>
-				<h2 className="title">Welcome</h2>
+				<h2 className="title">Librarian Login</h2>
            		<div className="input-div one">
            		   <div className="i">
            		   		<i className="fas fa-user"></i>
@@ -46,6 +47,8 @@ function Login() {
             	   </div>
             	</div>
             	<button type="submit" className="btn" value="Login">Login</button>
+               <a href="/">Switch User...</a>
+
             </form>
         </div>
     </div>

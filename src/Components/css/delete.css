@@ -1,3 +1,7 @@
+html{
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+}
 
 .container_Search_delete {
   margin-top: 5%;
@@ -39,6 +43,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+
   }
 
 

@@ -1,31 +1,27 @@
 import React,{ useState, useEffect } from 'react'
 
-import './css/delete.css'
+import '../../css/delete.css'
 
 function DeleteBooks() {
-  const [count, setCount] = useState(10);
+  const [count, setCount] = useState(50);
   const [initial, setInitial] = useState(0);
-  const [nextvisibe, setNextvisible] = useState('block');
-  const [prevvisible, setPrevvisible] = useState('none');
+  const [nextvisibe, setNextvisible] = useState('visible');
+  const [prevvisible, setPrevvisible] = useState('hidden');
   const [searchedbooks, setSearchedBooks] = useState([]);
 
   const handleSearch = (event) =>{
-    setInitial(0);
-    setCount(10);
-    setNextvisible('block');
-    setPrevvisible('none');
     let value = event.target.value.toLowerCase();
     let results = [];
-    results = books.filter(book => book.Title.toLowerCase().includes(value) || book.Author.toLowerCase().includes(value) || book.Subject.toLowerCase().includes(value) || book.Pdate.toLowerCase().includes(value));
+    results = books.filter(book => book.Title.toLowerCase().includes(value) || book.Author.toLowerCase().includes(value) || book.Subject.toLowerCase().includes(value) || book.Pdate.toLowerCase().includes(value) || book.quantity.toLowerCase().includes(value));
     setSearchedBooks(results);
 }
 
-
-    async function getbooks(){
-        const response = await fetch("http://localhost:8080/library_management/getbooks");
+async function getbooks(){
+        const response = await fetch("http://localhost:8080/library_management/getbooks?page="+initial);
          const data = await response.json();
          return data;
       }
+
       const [books, setBooks] = useState([]);
         useEffect(() => {
           getbooks().then(data => {
@@ -33,9 +29,34 @@ function DeleteBooks() {
             setSearchedBooks(data);
           }
           );
-        }, []);
+        }, [initial, count]);
 
 
+
+        const handleNext = () =>{
+          setInitial(initial+50);
+          setCount(count+50);
+          if(books.length < 50){
+            setNextvisible('hidden');
+          }
+          else{
+            setNextvisible('visible');
+          }
+          setPrevvisible('visible');
+        }
+
+        const handlePrev = () =>{
+          
+          setInitial(initial-50);
+          setCount(count-50);
+          if(initial === 50){
+            setPrevvisible('hidden');
+          }
+          
+          setNextvisible('visible');
+        }
+
+if(sessionStorage.getItem("loggedin") === "true"){
   return (    
       <>
       <br></br>
@@ -57,17 +78,20 @@ function DeleteBooks() {
                 <th>Author</th>
                 <th>Subject</th>
                 <th>Publication Date</th>
+                <th>Quantity</th>
                 <th>Delete</th>
               </tr>
             </thead>
             <tbody>
-              {searchedbooks.slice(initial,count).map(book => (
+              {
+              searchedbooks.map(book => (
                 <tr key={book.Id}>
                   <td>{book.Id}</td>
                   <td>{book.Title}</td>
                   <td>{book.Author}</td>
                   <td>{book.Subject}</td>
                   <td>{book.Pdate}</td>
+                  <td>{book.quantity}</td>
                   <td>
                       <button className='delete_button' onClick={
                             () => {
@@ -98,35 +122,40 @@ function DeleteBooks() {
 
     </div>
     <div className="container_Pagination">
-    <div className='inner'><button style={{"display": prevvisible} } className="button_Pagination" id='Previous' onClick={
-        () => {
-        setInitial(initial-10);
-        setCount(count-10);
-        //console.log(initial);
-        if(initial-10===0){
-            setPrevvisible('none');
-        }
-        setNextvisible('block');
-        }
-    }>Previous</button></div>
-   <div className='inner'> <button style={{"display": nextvisibe} } className="button_Pagination" id='Next' onClick={() =>{
-        //console.log(count);
-        if(count > searchedbooks.length-10){
-            setNextvisible('none');
-        }
-        setPrevvisible('block');
-
-         setInitial(initial+10);
-         setCount(count+10);
-         //console.log(count);
-
-        }
-    }>Next</button></div>
+    <div className="pagination">
+    <button className='prev_button' onClick={handlePrev} style={{visibility:prevvisible}}>Previous</button>
+    <button className='next_button' onClick={handleNext} style={{visibility:nextvisibe}}>Next</button>
+    </div>  
     </div>
     <br></br>
-    <a href='#/home' className='abtn'> HOME </a>
+                <div className="container_Home">
+                    <div className="tabs_Home">
+                        <button className="tablinks_Home abtn" onClick={() => {
+                            sessionStorage.removeItem("uid");
+                                   sessionStorage.removeItem("uname");
+                                   sessionStorage.removeItem("email");
+                                   window.location.href = "#/login";
+                        }
+                        }>LOGOUT</button>
+                        <button className="tablinks_Home abtn" onClick={() => {
+                            window.location.href = "#/home";
+                        }
+                        }>Home</button>
+                    </div>
+                </div>
     </>
   )
+}
+else{
+  return (
+    <div>
+        <h1>Please Login To Delete Books</h1>
+        <button className='tablinks_Home' onClick={() => {
+            window.location.href = "#/login";
+        }}>Login</button>
+    </div>
+)
+}
 }
 
 export default DeleteBooks

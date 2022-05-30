@@ -1,5 +1,6 @@
 import React from 'react'
-import './css/addbooks.css'
+import '../../css/addbooks.css'
+
 function AddBooks() {
   function handleSubmit(event) {
 
@@ -14,7 +15,7 @@ function AddBooks() {
       data.set("subject", "Other");
     }
 
-    fetch("http://localhost:8080/library_management/AddBooks?BookTitle=" + data.get("title") + "&Author=" + data.get("author") + "&Subject=" + data.get("subject") + "&PDate=" + data.get("date"))
+    fetch("http://localhost:8080/library_management/AddBooks?BookTitle=" + data.get("title") + "&Author=" + data.get("author") + "&Subject=" + data.get("subject") + "&PDate=" + data.get("date") + "&Quantity=" + data.get("quantity"))
       .then((response) => response.json())
         .then((data1) => {
           console.log(data1);
@@ -30,6 +31,7 @@ function AddBooks() {
       }
   }
 
+  if(sessionStorage.getItem("loggedin") === "true"){
   return (
     <>
       
@@ -56,9 +58,16 @@ function AddBooks() {
             </div>
             <div className="input-div pass">
               <div className="i">
-              </div>
+            </div>
               <div>
                 <input type="text" name='subject' className="input" placeholder="Subject"/>
+              </div>
+            </div>
+            <div className="input-div pass">
+              <div className="i">
+            </div>
+              <div>
+                <input type="number" name='quantity' className="input" placeholder="Quantity"/>
               </div>
             </div>
             <div className="input-div pass">
@@ -70,7 +79,21 @@ function AddBooks() {
             </div>
             <button type="submit" className="btn btn-primary" value="Add">ADD</button>
             <br></br>
-    <a href='#/home' className='abtn'> HOME </a>
+            <div className="container_Home">
+                    <div className="tabs_Home">
+                        <button className="tablinks_Home abtn" onClick={() => {
+                            sessionStorage.removeItem("uid");
+                                   sessionStorage.removeItem("uname");
+                                   sessionStorage.removeItem("email");
+                                   window.location.href = "#/login";
+                        }
+                        }>LOGOUT</button>
+                        <button className="tablinks_Home abtn" onClick={() => {
+                            window.location.href = "#/home";
+                        }
+                        }>Home</button>
+                    </div>
+                </div>
           </form>
         </div>
         
@@ -78,5 +101,13 @@ function AddBooks() {
     </>
   )
 }
-
+else{
+  return (
+    <div>
+      <h1>Please Login to Add Books</h1>
+      <a href='#/login' className='abtn'> LOGIN </a>
+    </div>
+  )
+}
+}
 export default AddBooks
