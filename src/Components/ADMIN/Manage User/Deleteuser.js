@@ -2,7 +2,10 @@ import React,{useState,useEffect} from 'react'
 import UserBooks from './UserBooks';
 
 function Deleteuser() {
-
+    const [count, setCount] = useState(50);
+    const [initial, setInitial] = useState(0);
+    const [nextvisibe, setNextvisible] = useState('visible');
+    const [prevvisible, setPrevvisible] = useState('hidden');
     const [users, setUsers] = useState([
 
         {   
@@ -23,11 +26,34 @@ function Deleteuser() {
     }
 
     async function getusers(){
-        const response = await fetch("http://localhost:8080/library_management/getusers");
+        const response = await fetch("http://localhost:8080/library_management/getusers?page="+initial);
         const data = await response.json();
         // console.log(data);
         return data;
     }
+
+    const handleNext = () =>{
+        setInitial(initial+50);
+        setCount(count+50);
+        if(users.length < 50){
+          setNextvisible('hidden');
+        }
+        else{
+          setNextvisible('visible');
+        }
+        setPrevvisible('visible');
+      }
+    
+      const handlePrev = () =>{
+        
+        setInitial(initial-50);
+        setCount(count-50);
+        if(initial === 50){
+          setPrevvisible('hidden');
+        }
+        
+        setNextvisible('visible');
+      }  
 
     useEffect(() => {
         getusers().then(data => {
@@ -35,7 +61,7 @@ function Deleteuser() {
             setSearchedusers(data);
         }
         );
-    }, []);
+    }, [initial, count]);
 
 if(sessionStorage.getItem("loggedin") === "true"){
   return (
@@ -113,16 +139,22 @@ if(sessionStorage.getItem("loggedin") === "true"){
                             >
                                 Delete
                             </button>
-                        </td>
-                    </tr>
+                        </td>                    
+                    </tr>        
                 ))}
             </tbody>
+            
             </table>
+ 
             {users.map(user => (
-                <div key={user.Id} id={"user_books_"+user.Id} style={{"display": "none"}}>
-                <UserBooks key={user.Id} userId={user.Id} userName={user.Name} />
-                </div>
-            ))}
+                        <div key={user.Id} id={"user_books_"+user.Id} style={{"display": "none"}}>
+                        <UserBooks key={user.Id} userId={user.Id} userName={user.Name} />
+                        </div>
+                        ))}
+            <div className="pagination">
+            <button className='prev_button' onClick={handlePrev} style={{visibility:prevvisible}}>Previous</button>
+            <button className='next_button' onClick={handleNext} style={{visibility:nextvisibe}}>Next</button>
+            </div> 
                 <div className="container_Home">
                     <div className="tabs_Home">
                         <button className="tablinks_Home abtn" onClick={() => {
@@ -138,6 +170,7 @@ if(sessionStorage.getItem("loggedin") === "true"){
                         }>Home</button>
                     </div>
                 </div>
+                
         </div>
 
   )

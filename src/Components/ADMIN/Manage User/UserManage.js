@@ -5,9 +5,13 @@ import UserBooks from './UserBooks';
 function UserManage() {
     let confirm = 0;
 
+    const [count, setCount] = useState(50);
+    const [initial, setInitial] = useState(0);
     let [ediuser, setEdiuser] = useState([]);
     let [prevuser, setPrevuser] = useState([]);
     const [savebtn, setSavebtn] = useState('none');
+    const [nextvisibe, setNextvisible] = useState('visible');
+    const [prevvisible, setPrevvisible] = useState('hidden');
     const [id, setId] = useState('');
     const [users, setUsers] = useState([
 
@@ -23,11 +27,35 @@ function UserManage() {
     const handleSearch = (event) =>{
         let value = event.target.value.toLowerCase();
         let results = [];
-        results = users.filter(user => user.Name.toLowerCase().includes(value) || user.Email.toLowerCase().includes(value));
+        results = users.filter(user => user.Name.toLowerCase().includes(value) || user.Email.toLowerCase().includes(value) || user.Education.toLowerCase().includes(value) || user.FullName.toLowerCase().includes(value));
         setSearchedusers(results);
     }
 
     const [editingRow, setEditingRow] = useState(null);
+
+    const handleNext = () =>{
+        setInitial(initial+50);
+        setCount(count+50);
+        if(users.length < 50){
+          setNextvisible('hidden');
+        }
+        else{
+          setNextvisible('visible');
+        }
+        setPrevvisible('visible');
+      }
+    
+      const handlePrev = () =>{
+        
+        setInitial(initial-50);
+        setCount(count-50);
+        if(initial === 50){
+          setPrevvisible('hidden');
+        }
+        
+        setNextvisible('visible');
+      }  
+
 
     async function editRow(user,prevuser){
         console.log(user);
@@ -65,7 +93,7 @@ function UserManage() {
       }
 
     async function getusers(){
-        const response = await fetch("http://localhost:8080/library_management/getusers");
+        const response = await fetch("http://localhost:8080/library_management/getusers?page="+initial);
         const data = await response.json();
         // console.log(data);
         return data;
@@ -77,7 +105,7 @@ function UserManage() {
             setSearchedusers(data);
         }
         );
-    }, []);
+    }, [initial, count]);
 
   return (
     // TODO CREATE USER MANAGE PAGE
@@ -199,7 +227,11 @@ function UserManage() {
                 ))}
             </tbody>
             </table>
-            {/* CREATE A TABLE TO DISPLAY USER BOOKS */}
+            
+            <div className="pagination">
+            <button className='prev_button' onClick={handlePrev} style={{visibility:prevvisible}}>Previous</button>
+            <button className='next_button' onClick={handleNext} style={{visibility:nextvisibe}}>Next</button>
+            </div>  
             
             {/* HOME BUTTON */}
             <div className="container_Home">

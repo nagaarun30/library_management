@@ -163,11 +163,11 @@ if(sessionStorage.getItem("loggedin") === "true"){
                 </tbody>
             </table>
             <div className="container_Pagination">
-    <div className="pagination">
-    <button className='prev_button' onClick={handlePrev} style={{visibility:prevvisible}}>Previous</button>
-    <button className='next_button' onClick={handleNext} style={{visibility:nextvisibe}}>Next</button>
-    </div>  
-    </div>
+        <div className="pagination">
+        <button className='prev_button' onClick={handlePrev} style={{visibility:prevvisible}}>Previous</button>
+        <button className='next_button' onClick={handleNext} style={{visibility:nextvisibe}}>Next</button>
+        </div>  
+        </div>
     <div className="container_Home">
                     <div className="tabs_Home">
                         <button className="tablinks_Home abtn" onClick={() => {
